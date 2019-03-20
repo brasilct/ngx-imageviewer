@@ -231,6 +231,7 @@ var ImageViewerComponent = (function () {
         this.style.msTransform = this.style.transform;
         this.style.webkitTransform = this.style.transform;
         this.style.oTransform = this.style.transform;
+        this.style.scale = this.scale;
     };
     /**
      * @param {?} defaultValues
