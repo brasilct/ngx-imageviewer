@@ -1,157 +1,113 @@
-# Angular 6 - Canvas Image/PDF Viewer
+# NgxImageViewer
 
-[![travis build](https://travis-ci.org/hallysonh/ngx-imageviewer.svg?branch=master)](https://travis-ci.org/hallysonh/ngx-imageviewer)
-[![Greenkeeper badge](https://badges.greenkeeper.io/hallysonh/ngx-imageviewer.svg)](https://greenkeeper.io/)
-[![version](https://img.shields.io/npm/v/@hallysonh/ngx-imageviewer.svg)](http://npm.im/@hallysonh/ngx-imageviewer)
-[![MIT License](https://img.shields.io/github/license/hallysonh/ngx-imageviewer.svg)](https://opensource.org/licenses/MIT)
-[![semantic-release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg)](https://github.com/semantic-release/semantic-release)
+A configurable Angular image viewer component, compatible with Angular 2.x, 4.x and 5.x
 
-This project generate a image/pdf viewer using canvas.
+## Features:
+ * Compatible with Angular 2.x, 4.x and 5.x
+ * Configurable
+ * Rotate image
+ * Zoom image
+ * Drag to move image
+ * Toggle fullscreen mode
 
-## Features
+## DEMO
 
-* Configurable
-* Resizeble component
-* Supports JPEG, PNG, GIF and **PDF**
-* Support File Objects
-* Avaliable actions:
-  * **Rotate**
-  * **Zoom**
-  * Reset to maximize size
-  * Free movable
-  * Change page (available just for PDF files)
+https://angular-2wrbwp.stackblitz.io/
 
-## Demo
+---
 
-Access a demo [here](https://hallysonh.github.io/ngx-imageviewer/) or download this project and execute: `yarn && yarn start` or `npm install && npm run start` to self server it.
+## Set up
 
-## Install
+To use default configuration, simply import the ImageViewerModule into your module, like so:
 
-Run `yarn add @hallysonh/ngx-imageviewer hammerjs` to install it and its dependency.
-
-> hammerjs is currently mandatory, but it will be optional in a future release.
-
-## Icon Font
-
-You can use any icon font to render the button's icons. However, the default icon font is the Google's Material Icons. To use them you can just add the follow line to your index.html:
-
-```html
-<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-```
-
-Optionaly, you can also install the font library via npm or yarn.
-
-> when using another icon font, you should provide a config object with the button icon mapping
-
-## Basic Usage
-
-After import the module `ImageViewerModule`:
-
-```typescript
-import { ImageViewerModule } from '@hallysonh/ngx-imageviewer';
+```javascript
+import { ImageViewerModule } from "ngx-image-viewer";
 
 @NgModule({
+  //...
   imports: [
-    ImageViewerModule
-  ]
+    //...
+    ImageViewerModule.forRoot()
+  ],
+  //...
 })
-export class AppModule { }
-
 ```
 
-Use the follow code on your html:
+Then, add the component to your template, providing an array of image URLs. You can also optionally add an index, to indicate which image should be shown first. The default will be the first item in the array.
 
 ```html
-<ngx-imageviewer [src]="imageSrc"></ngx-imageviewer>
+<ngx-image-viewer  [src]="images" [(index)]="imageIndex"></ngx-image-viewer>
 ```
 
-Optionaly, you can provide the fields `width` and `height`. If you omit those values, the width and height in the config object will be used.
+By default, the image viewer will fill its container. If you wish to restrict the size, simply place it within a div, and set the size constraints on the div.
 
-## Add PDF Support
 
-To add PDF rendering support, you must first include `pdfjs` by running `yarn add pdfjs-dist@2.0.489` and add its reference in your `angular.json` file, like below:
+If you want to use the standard icons, you will also need to install `font-awesome`
 
-```json
+```
+npm install --save font-awesome
+```
+
+Otherwise, you will need to use the configuration to set different icon classes.
+
+
+---
+
+## Configuration
+
+Configuration can be provided at the module level (by passing the object as an argument to `forRoot()`, or at the component level, by passing it as the `config` input. Any configuration provided at the component level will override that which is set at the module level.
+
+The configuration object is structured as below. All values are optional, and if ommitted, the default value shown below will be used.
+
+```javascript
 {
-  ...
-  "scripts": [
-    {
-      "input": "node_modules/pdfjs-dist/build/pdf.min.js"
-    }, {
-      "input": "node_modules/pdfjs-dist/build/pdf.worker.min.js"
+  btnClass: 'default', // The CSS class(es) that will apply to the buttons
+  zoomFactor: 0.1, // The amount that the scale will be increased by
+  containerBackgroundColor: '#ccc', // The color to use for the background. This can provided in hex, or rgb(a).
+  wheelZoom: true, // If true, the mouse wheel can be used to zoom in
+  allowFullscreen: true, // If true, the fullscreen button will be shown, allowing the user to entr fullscreen mode
+  allowKeyboardNavigation: true, // If true, the left / right arrow keys can be used for navigation
+  btnIcons: { // The icon classes that will apply to the buttons. By default, font-awesome is used.
+    zoomIn: 'fa fa-plus',
+    zoomOut: 'fa fa-minus',
+    rotateClockwise: 'fa fa-repeat',
+    rotateCounterClockwise: 'fa fa-undo',
+    next: 'fa fa-arrow-right',
+    prev: 'fa fa-arrow-left',
+    fullscreen: 'fa fa-arrows-alt',
+  },
+  btnShow: {
+    zoomIn: true,
+    zoomOut: true,
+    rotateClockwise: true,
+    rotateCounterClockwise: true,
+    next: true,
+    prev: true
+  }
+};
+```
+
+To add additional buttons use the following 
+
+```html 
+<ngx-image-viewer [src]="images" 
+                  [config]="{customBtns:[{name: 'link', icon: 'fa fa-paperclip'}]}"
+                  (customEvent)="handleEvent($event)">
+</ngx-image-viewer>
+```
+
+```javascript
+handleEvent(event: CustomEvent) {
+    console.log(`${event.name} has been click on img ${event.imageIndex + 1}`);
+
+    switch (event.name) {
+      case 'print':
+        console.log('run print logic');
+        break;
     }
-  ],
-  ...
 }
 ```
 
-## Custom Configuration
+Note: currently only 3 additional buttons is supported due to css
 
-Optionaly, you can provide a custom configuration like below:
 
-```typescript
-import { IMAGEVIEWER_CONFIG, ImageViewerConfig } from '@hallysonh/ngx-imageviewer';
-...
-const MY_IMAGEVIEWER_CONFIG: ImageViewerConfig = {
-  buttonStyle: {
-    bgStyle: '#B71C1C' // custom container's background style
-  }
-};
-...
-@Component({
-  ...
-  providers: [
-    {
-      provide: IMAGEVIEWER_CONFIG,
-      useValue: MY_IMAGEVIEWER_CONFIG
-    }
-  ]
-  ...
-})
-...
-```
-
-The default configuration available is:
-
-```typescript
-export const IMAGEVIEWER_CONFIG_DEFAULT: ImageViewerConfig = {
-  width: 800, // component default width
-  height: 600, // component default height
-  bgStyle: '#ECEFF1', // component background style
-  scaleStep: 0.1, // zoom scale step (using the zoom in/out buttons)
-  rotateStepper: false, // touch rotate should rotate only 90 to 90 degrees
-  loadingMessage: 'Loading...',
-  buttonStyle: {
-    iconFontFamily: 'Material Icons', // font used to render the button icons
-    alpha: 0.5, // buttons' transparence value
-    hoverAlpha: 0.7, // buttons' transparence value when mouse is over
-    bgStyle: '#000000', //  buttons' background style
-    iconStyle: '#ffffff', // buttons' icon colors
-    borderStyle: '#000000', // buttons' border style
-    borderWidth: 0 // buttons' border width (0 == disabled)
-  },
-  tooltips: {
-    enabled: true, // enable or disable tooltips for buttons
-    bgStyle: '#000000', // tooltip background style
-    bgAlpha: 0.5, // tooltip background transparence
-    textStyle: '#ffffff', // tooltip's text style
-    textAlpha: 0.9, // tooltip's text transparence
-    padding: 15, // tooltip padding
-    radius: 20 // tooltip border radius
-  },
-  zoomOutButton: { // zoomOut button config
-    icon: 'zoom_out', // icon text
-    tooltip: 'Zoom out', // button tooltip
-    sortId: 0, // number used to determine the order of the buttons
-    show: true // used to show/hide the button
-  },
-
-  // shorter button configuration style
-  nextPageButton: createButtonConfig('navigate_next', 'Next page', 0),
-  beforePageButton: createButtonConfig('navigate_before', 'Previous page', 1),
-  zoomInButton: createButtonConfig('zoom_in', 'Zoom in', 1),
-  rotateLeftButton: createButtonConfig('rotate_left', 'Rotate left', 2),
-  rotateRightButton: createButtonConfig('rotate_right', 'Rotate right', 3),
-  resetButton: createButtonConfig('autorenew', 'Reset', 4)
-};
-```
